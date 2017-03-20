@@ -1,0 +1,9 @@
+# files git should ignore
+
+FileHolding/*
+Spectrum/*
+Test_Plots/*
+
+*.pyc
+
+.DS_Store
