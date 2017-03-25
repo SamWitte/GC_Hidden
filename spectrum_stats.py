@@ -54,7 +54,7 @@ def mass_scan(filef='BB_direct_mx_', gamma=1.2, maj=True, s_low=5.e-27,
         findmx = f.find('mx_')
         findGeV = f.find('GeV')
         mx_list[i] = float(f[findmx + 3:findGeV])
-        f_tail = f[f.find('BB_direct_mx'):]
+        f_tail = f[f.find(filef):]
         bf_array[i] = sig_contour(spec=f_tail, gamma=gamma, maj=maj, s_low=s_low, s_high=s_high, n_sigs=n_sigs,
                                   contour_val=contour_val, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix,
                                   make_file=True)
@@ -66,7 +66,7 @@ def mass_scan(filef='BB_direct_mx_', gamma=1.2, maj=True, s_low=5.e-27,
     print 'Best Fit ChiSq Value: ', goal.fun
     info_hold = np.zeros((len(all_files), 6))
     for i, f in enumerate(all_files):
-        f_tail = f[f.find('BB_direct_mx'):]
+        f_tail = f[f.find(filef):]
         hold = sig_contour(spec=f_tail, gamma=gamma, maj=maj, s_low=s_low, s_high=s_high, n_sigs=n_sigs,
                                    contour_val=contour_val, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix,
                                    make_file=False, goal=goal.fun)
