@@ -58,26 +58,27 @@ def mass_scan(filef='BB_direct_mx_', gamma=1.2, maj=True, s_low=5.e-27,
         bf_array[i] = sig_contour(spec=f_tail, gamma=gamma, maj=maj, s_low=s_low, s_high=s_high, n_sigs=n_sigs,
                                   contour_val=contour_val, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix,
                                   make_file=True)
-    print mx_list
-    print bf_array
+    #print mx_list
+    #print bf_array
     goal_look = interp1d(mx_list, bf_array, kind='cubic', bounds_error=False, fill_value=10.**5.)
     goal = minimize(goal_look, np.median(mx_list))
-    print 'Best Fit Mass: ', goal.x
-
-    info_hold = np.zeros((len(all_files), 5))
+    print 'Best Fit Mass: ', goal.x[0]
+    print 'Best Fit ChiSq Value: ', goal.fun
+    info_hold = np.zeros((len(all_files), 6))
     for i, f in enumerate(all_files):
         f_tail = f[f.find('BB_direct_mx'):]
-        info_hold[i] = sig_contour(spec=f_tail, gamma=gamma, maj=maj, s_low=s_low, s_high=s_high, n_sigs=n_sigs,
+        hold = sig_contour(spec=f_tail, gamma=gamma, maj=maj, s_low=s_low, s_high=s_high, n_sigs=n_sigs,
                                    contour_val=contour_val, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix,
                                    make_file=False, goal=goal.fun)
-
-    contours = info_hold[:, -1]
+        info_hold[i] = hold[-1]
+    #print info_hold
+    contours = info_hold
     tot_contours = len(contour_name)
     for i, cc in enumerate(contour_name):
         c_fname = MAIN_PATH + '/FileHolding/Contours/' + filef + cc
         c_fname += 'Gamma_{:.2f}_ScaleR_{:.2f}_Rfix_{:.2f}_RhoFix_{:.2f}'.format(gamma, scale_r, rfix, rho_fix)
         c_fname += '.dat'
-        consv = np.hstack((mx_list, contours[:, i], contours[:, i+tot_contours]))
+        consv = np.stack((mx_list, contours[:, i], contours[:, i+tot_contours]), axis=-1)
         np.savetxt(c_fname, consv)
 
     return

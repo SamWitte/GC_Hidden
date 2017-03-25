@@ -5,10 +5,7 @@ import os
 from scipy.interpolate import interp1d
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib as mpl
-from experiments import *
-from likelihood import *
-from helpers import *
-from rate_UV import *
+
 
 import matplotlib.patheffects as PathEffects
 import matplotlib.gridspec as gridspec
@@ -41,24 +38,27 @@ def mx_sigma_contours(end_p='BB', trans='_direct_', contour_name=np.array(['_1Si
     pl.figure()
     ax = pl.gca()
 
+    linestyle = ['solid', 'dashed', 'dotted']
     for i,cc in enumerate(contour_name):
-        foi = MAIN_PATH + '/FileHolding/Contours/' + end_p + trans + 'mx' + cc
+        foi = MAIN_PATH + '/FileHolding/Contours/' + end_p + trans + 'mx_' + cc
         foi += 'Gamma_{:.2f}_ScaleR_{:.2f}_Rfix_{:.2f}_RhoFix_{:.2f}'.format(gamma, scale_r, rfix, rho_fix)
         foi += '.dat'
 
         loadf = np.loadtxt(foi)
+        loadf = loadf[loadf[:, 1] != 1.]
+
         low = interp1d(loadf[:, 0], loadf[:, 1], kind='cubic', bounds_error=False)
         high = interp1d(loadf[:, 0], loadf[:, 2], kind='cubic', bounds_error=False)
-        massr = np.linspace(np.min(loadf[:,0]), np.max(loadf[:,0]), 200)
+        massr = np.linspace(np.min(loadf[:, 0]), np.max(loadf[:, 0]), 200)
 
-        pl.plot(massr, low(massr), 'r-', lw=1)
-        pl.plot(massr, high(massr), 'r-', lw=1)
+        pl.plot(massr, low(massr), 'r', lw=1, ls=linestyle[i])
+        pl.plot(massr, high(massr), 'r', lw=1, ls=linestyle[i])
 
     ax.set_xlabel(r'$m_\chi$  [GeV]', fontsize=fs)
-    ax.set_ylabel(r'<\sigma {\rm v}>  [$cm^{3} s^{-1}$]', fontsize=fs)
+    ax.set_ylabel(r'$<\sigma {\rm v}>$  [$cm^{3} s^{-1}$]', fontsize=fs)
 
     plt.xlim(xmin=10., xmax=100.)
-    plt.ylim(ymin=6.*10**-27., ymax=4.*10**-26.)
+    plt.ylim(ymin=1.*10**-27., ymax=1.*10**-25.)
     ax.set_xscale("log")
     ax.set_yscale("log")
 
