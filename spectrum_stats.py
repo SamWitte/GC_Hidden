@@ -91,7 +91,7 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
 
     file_name = MAIN_PATH + '/FileHolding/Contours/ChiSq/Tabbed_ChiSq_'
     file_name += 'Gamma_{:.2f}_ScaleR_{:.2f}_Rfix_{:.2f}_RhoFix_{:.2f}'.format(gamma, scale_r, rfix, rho_fix)
-    file_name += spec
+    file_name += '_' + spec
 
     findmx = spec.find('mx_')
     findGeV = spec.find('GeV')

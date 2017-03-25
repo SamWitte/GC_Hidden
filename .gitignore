@@ -4,5 +4,6 @@
 Test_Plots/*
 
 *.pyc
+*~
 
 .DS_Store
