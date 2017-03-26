@@ -122,8 +122,8 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
         sl = np.zeros(len(contour_val))
         sh = np.zeros(len(contour_val))
 
-        bndsl = [(np.log10(s_low), bf[0])]
-        bndsh = [(bf[0], np.log10(s_high))]
+        bndsl = [(-100., bf[0])]
+        bndsh = [(bf[0], 0.)]
 
         for j, cc in enumerate(contour_val):
             if bf[1] > (goal + cc):
