@@ -30,6 +30,7 @@ elif args.maj == 'F':
 
 
 mass_scan(filef=args.filef, gamma=args.gamma, maj=True,
+          s_low=args.s_low, s_high=args.s_high, n_sigs=args.n_sigs,
           contour_val=args.contour_val,
           contour_name=args.contour_name,
           scale_r=args.scale_r, rfix=args.rfix, rho_fix=args.rho_fix)
