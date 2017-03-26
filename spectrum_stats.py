@@ -65,9 +65,8 @@ def mass_scan(filef='BB_direct_mx_', gamma=1.2, maj=True, s_low=5.e-27,
     bf_array = bf_array[order]
     print 'Mass, BF'
     print np.column_stack((mx_list, bf_array))
-
-    goal_look = interp1d(mx_list, bf_array, kind='cubic', bounds_error=False, fill_value=10.**5.)
-    print goal_look(30.)
+    goal_look = interp1d(mx_list, bf_array, kind='linear')
+    goal_look = interp1d(mx_list, bf_array, kind='cubic')
     goal = minimize(goal_look, np.median(mx_list))
     print 'Best Fit Mass: ', goal.x[0]
     print 'Best Fit ChiSq Value: ', goal.fun
