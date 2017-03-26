@@ -140,9 +140,9 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
                 pass
             else:
                 slch = minimize(lambda x: np.abs(chi_interp(x) - cc - goal), np.array([bf[0] - 0.5]),
-                                 method='SLSQP', bounds=bndsl)
+                                 method='SLSQP', bounds=bndsl, tol=1.e-4)
                 shch = minimize(lambda x: np.abs(chi_interp(x) - cc - goal), np.array([bf[0] + 0.5]),
-                                 method='SLSQP', bounds=bndsh)
+                                 method='SLSQP', bounds=bndsh, tol=1.e-4)
                 if slch.success:
                     sl[j] = slch.x
                 if shch.success:
