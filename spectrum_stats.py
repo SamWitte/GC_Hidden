@@ -132,8 +132,8 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
         sl = np.zeros(len(contour_val))
         sh = np.zeros(len(contour_val))
 
-        bndsl = [(-30., bf[0])]
-        bndsh = [(bf[0], -20.)]
+        bndsl = [(s_low, bf[0])]
+        bndsh = [(bf[0], s_high)]
 
         for j, cc in enumerate(contour_val):
             if bf[1] > (goal + cc):
@@ -143,7 +143,7 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
                 shch = fminbound(lambda x: np.abs(chi_interp(x) - cc - goal),bndsh[0][0],bndsh[0][1], full_output=True)
 
 
-                print slch
+                print slch, shch
                 #shch = minimize(lambda x: np.abs(chi_interp(x) - cc - goal), np.array([bf[0] + 0.5]),
                 #                 method='SLSQP', bounds=bndsh, tol=1.e-4)
                 if slch[2] == 0:
