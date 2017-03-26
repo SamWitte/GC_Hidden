@@ -138,10 +138,14 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
             if bf[1] > (goal + cc):
                 pass
             else:
-                sl[j] = minimize(lambda x: np.abs(chi_interp(x) - cc - goal), np.array([bf[0] - 0.1]),
-                                 method='SLSQP', bounds=bndsl).x
-                sh[j] = minimize(lambda x: np.abs(chi_interp(x) - cc - goal), np.array([bf[0] + 0.1]),
-                                 method='SLSQP', bounds=bndsh).x
+                slch = minimize(lambda x: np.abs(chi_interp(x) - cc - goal), np.array([bf[0] - 0.5]),
+                                 method='SLSQP', bounds=bndsl)
+                shch = minimize(lambda x: np.abs(chi_interp(x) - cc - goal), np.array([bf[0] + 0.5]),
+                                 method='SLSQP', bounds=bndsh)
+                if slch.success:
+                    sl[j] = slch.x
+                if shch.success:
+                    sh[j] = shch.x
 
         # Return format: Gamma, mx, Min chi^2, BF sigma_p, 1\sig_L, 2\sig_L, 3\sig_L, 1\sig_H, 2\sig_H,3\sig_H
         return gamma, mx, bf[1], 10.**bf[0][0], np.concatenate((10.**sl, 10.**sh))
