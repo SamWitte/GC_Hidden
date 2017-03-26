@@ -124,7 +124,8 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
         return bf[-1]
     else:
         chisq = np.loadtxt(file_name)
-        chi_interp = interp1d(chisq[:, 0], chisq[:, 1], kind='cubic', fill_value=10.**5., bounds_error=False)
+        #chi_interp = interp1d(chisq[:, 0], chisq[:, 1], kind='cubic', fill_value=10.**5., bounds_error=False)
+        chi_interp = interp1d(chisq[:, 0], chisq[:, 1], kind='linear', fill_value=10. ** 5., bounds_error=False)
 
         bf = chi_covariance(spec=spec, maj=maj, gamma=gamma, bf=True, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix)
 
