@@ -67,7 +67,7 @@ def mass_scan(filef='BB_direct_mx_', gamma=1.2, maj=True, s_low=5.e-27,
     print 'Mass, BF'
     print tot_arr
 
-    goal_look = interp1d(tot_arr[:, 0], tot_arr[:, 1], kind='cubic', bounds_error=False, fill_value=1.e5)
+    goal_look = interp1d(tot_arr[:, 0], tot_arr[:, 1], kind='linear', bounds_error=False, fill_value=1.e5)
     goal = minimize(goal_look, np.median(tot_arr[:, 0]))
     print 'Best Fit Mass: ', goal.x[0]
     print 'Best Fit ChiSq Value: ', goal.fun
