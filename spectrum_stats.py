@@ -63,6 +63,8 @@ def mass_scan(filef='BB_direct_mx_', gamma=1.2, maj=True, s_low=5.e-27,
     order = np.argsort(mx_list)
     mx_list = mx_list[order]
     bf_array = bf_array[order]
+    print 'Mass, BF'
+    print np.column_stack((mx_list, bf_array))
     goal_look = interp1d(mx_list, bf_array, kind='cubic', bounds_error=False, fill_value=10.**5.)
     goal = minimize(goal_look, np.median(mx_list))
     print 'Best Fit Mass: ', goal.x[0]
@@ -102,7 +104,7 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
     mx = float(spec[findmx + 3:findGeV])
 
     if make_file:
-        print 'Make ChiSq Tabs'
+        
         bf = chi_covariance(spec=spec, maj=maj, gamma=gamma, bf=True, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix)
 
         if os.path.isfile(file_name):
