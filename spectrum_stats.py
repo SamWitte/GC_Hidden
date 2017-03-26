@@ -60,6 +60,9 @@ def mass_scan(filef='BB_direct_mx_', gamma=1.2, maj=True, s_low=5.e-27,
                                   make_file=True)
     #print mx_list
     #print bf_array
+    order = np.argsort(mx_list)
+    mx_list = mx_list[order]
+    bf_array = bf_array[order]
     goal_look = interp1d(mx_list, bf_array, kind='cubic', bounds_error=False, fill_value=10.**5.)
     goal = minimize(goal_look, np.median(mx_list))
     print 'Best Fit Mass: ', goal.x[0]
