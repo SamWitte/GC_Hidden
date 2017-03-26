@@ -139,14 +139,17 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
             if bf[1] > (goal + cc):
                 pass
             else:
-                slch = minimize(lambda x: np.abs(chi_interp(x) - cc - goal), np.array([bf[0] - 0.5]),
-                                 method='SLSQP', bounds=bndsl, tol=1.e-4)
-                shch = minimize(lambda x: np.abs(chi_interp(x) - cc - goal), np.array([bf[0] + 0.5]),
-                                 method='SLSQP', bounds=bndsh, tol=1.e-4)
-                if slch.success:
-                    sl[j] = slch.x
-                if shch.success:
-                    sh[j] = shch.x
+                slch = fminbound(lambda x: np.abs(chi_interp(x) - cc - goal),bndsl[0],bndsl[1], full_output=True)
+                shch = fminbound(lambda x: np.abs(chi_interp(x) - cc - goal),bndsh[0],bndsh[1], full_output=True)
+
+
+                print slch
+                #shch = minimize(lambda x: np.abs(chi_interp(x) - cc - goal), np.array([bf[0] + 0.5]),
+                #                 method='SLSQP', bounds=bndsh, tol=1.e-4)
+                if slch.ierr:
+                    sl[j] = slch.xopt
+                if shch.ierr:
+                    sh[j] = shch.xopt
 
         # Return format: Gamma, mx, Min chi^2, BF sigma_p, 1\sig_L, 2\sig_L, 3\sig_L, 1\sig_H, 2\sig_H,3\sig_H
         return gamma, mx, bf[1], 10.**bf[0][0], np.concatenate((10.**sl, 10.**sh))
