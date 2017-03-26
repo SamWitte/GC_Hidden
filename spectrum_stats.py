@@ -50,11 +50,13 @@ def mass_scan(filef='BB_direct_mx_', gamma=1.2, maj=True, s_low=5.e-27,
     bf_array = np.zeros(len(all_files))
     mx_list = np.zeros(len(all_files))
     # Make All Files...
+    print 'Making ChiSq Tabs...'
     for i,f in enumerate(all_files):
         findmx = f.find('mx_')
         findGeV = f.find('GeV')
         mx_list[i] = np.float(f[findmx + 3:findGeV])
         f_tail = f[f.find(filef):]
+        print 'On Mass {:.2f}...'.format(mx_list[i])
         bf_array[i] = sig_contour(spec=f_tail, gamma=gamma, maj=maj, s_low=s_low, s_high=s_high, n_sigs=n_sigs,
                                   contour_val=contour_val, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix,
                                   make_file=True)
@@ -64,21 +66,28 @@ def mass_scan(filef='BB_direct_mx_', gamma=1.2, maj=True, s_low=5.e-27,
     mx_list = mx_list[order]
     bf_array = bf_array[order]
     tot_arr = np.column_stack((mx_list, bf_array))
-    print 'Mass, BF'
-    print tot_arr
+    #print 'Mass, BF'
+    #print tot_arr
 
     goal_look = interp1d(tot_arr[:, 0], tot_arr[:, 1], kind='cubic', bounds_error=False, fill_value=1.e5)
     goal = minimize(goal_look, np.median(tot_arr[:, 0]))
     print 'Best Fit Mass: ', goal.x[0]
     print 'Best Fit ChiSq Value: ', goal.fun
     info_hold = np.zeros((len(all_files), 6))
+    print 'Constructing Contours...'
     for i, f in enumerate(all_files):
+        findmx = f.find('mx_')
+        findGeV = f.find('GeV')
+        mx_list[i] = np.float(f[findmx + 3:findGeV])
         f_tail = f[f.find(filef):]
         hold = sig_contour(spec=f_tail, gamma=gamma, maj=maj, s_low=s_low, s_high=s_high, n_sigs=n_sigs,
                                    contour_val=contour_val, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix,
                                    make_file=False, goal=goal.fun)
         info_hold[i] = hold[-1]
-    #print info_hold
+        print 'On Mass {:.2f}...'.format(mx_list[i])
+        print 'Info Hold: ', info_hold[i]
+
+    print 'Saving Files...'
     contours = info_hold
     tot_contours = len(contour_name)
     for i, cc in enumerate(contour_name):
@@ -86,8 +95,10 @@ def mass_scan(filef='BB_direct_mx_', gamma=1.2, maj=True, s_low=5.e-27,
         c_fname += 'Gamma_{:.2f}_ScaleR_{:.2f}_Rfix_{:.2f}_RhoFix_{:.2f}'.format(gamma, scale_r, rfix, rho_fix)
         c_fname += '.dat'
         consv = np.stack((mx_list, contours[:, i], contours[:, i+tot_contours]), axis=-1)
+        consv = consv[np.argsort(consv[:,0])]
         np.savetxt(c_fname, consv)
 
+    print 'Done.'
     return
 
 
@@ -110,8 +121,10 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
         bf = chi_covariance(spec=spec, maj=maj, gamma=gamma, bf=True, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix)
 
         if os.path.isfile(file_name):
+            print 'File already made.'
             return bf[-1]
 
+        print 'Making File for mx {:.2f}'.format(mx)
         s_list = np.linspace(np.log10(s_low), np.log10(s_high), n_sigs)
         hold_tab = np.zeros((len(s_list), 2))
         for i, sig in enumerate(s_list):
@@ -123,22 +136,29 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
         np.savetxt(file_name, hold_tab)
         return bf[-1]
     else:
+        print 'Finding contour for mx {:.2f}'.format(mx)
         chisq = np.loadtxt(file_name)
-        chi_interp = interp1d(chisq[:, 0], chisq[:, 1], kind='cubic', fill_value=10.**5., bounds_error=False)
+        chi_interp = interp1d(chisq[:, 0], np.log10(chisq[:, 1]),
+                              kind='cubic', fill_value=10.**5., bounds_error=False)
         #chi_interp = interp1d(chisq[:, 0], chisq[:, 1], kind='linear', fill_value=10. ** 5., bounds_error=False)
 
         bf = chi_covariance(spec=spec, maj=maj, gamma=gamma, bf=True, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix)
+        print 'ChiSq Min: {:.2f}'.format(bf[1])
 
         sl = np.zeros(len(contour_val))
         sh = np.zeros(len(contour_val))
 
-        bndsl = [(s_low, bf[0])]
-        bndsh = [(bf[0], s_high)]
+        bndsl = [(np.log10(s_low), bf[0])]
+        bndsh = [(bf[0], np.log10(s_high))]
+        #print 'Bounds: ', bndsl, bndsh
 
         for j, cc in enumerate(contour_val):
+            print 'BF ChiSq: {:.2f}, Target: {:.2f}'.format(bf[1],goal+cc)
             if bf[1] < (goal + cc):
-                slch = fminbound(lambda x: np.abs(chi_interp(x) - cc - goal),bndsl[0][0],bndsl[0][1], full_output=True)
-                shch = fminbound(lambda x: np.abs(chi_interp(x) - cc - goal),bndsh[0][1],bndsh[0][0], full_output=True)
+                slch = fminbound(lambda x: np.abs(10.**chi_interp(x) - cc - goal),
+                                 bndsl[0][0],bndsl[0][1], full_output=True)
+                shch = fminbound(lambda x: np.abs(10.**chi_interp(x) - cc - goal),
+                                 bndsh[0][0],bndsh[0][1], full_output=True)
 
 
                 print slch, shch

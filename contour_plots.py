@@ -39,6 +39,7 @@ def mx_sigma_contours(end_p='BB', trans='_direct_', contour_name=np.array(['_1Si
     ax = pl.gca()
 
     linestyle = ['solid', 'dashed', 'dotted']
+    colorl = ['blue', 'red']
     for i,cc in enumerate(contour_name):
         foi = MAIN_PATH + '/FileHolding/Contours/' + end_p + trans + 'mx_' + cc
         foi += 'Gamma_{:.2f}_ScaleR_{:.2f}_Rfix_{:.2f}_RhoFix_{:.2f}'.format(gamma, scale_r, rfix, rho_fix)
@@ -47,17 +48,20 @@ def mx_sigma_contours(end_p='BB', trans='_direct_', contour_name=np.array(['_1Si
         loadf = np.loadtxt(foi)
         loadf = loadf[loadf[:, 1] != 1.]
 
-        low = interp1d(loadf[:, 0], loadf[:, 1], kind='cubic', bounds_error=False)
-        high = interp1d(loadf[:, 0], loadf[:, 2], kind='cubic', bounds_error=False)
+        low = interp1d(np.log10(loadf[:, 0]), np.log10(loadf[:, 1]), kind='cubic', bounds_error=False)
+        high = interp1d(np.log10(loadf[:, 0]), np.log10(loadf[:, 2]), kind='cubic', bounds_error=False)
         massr = np.linspace(np.min(loadf[:, 0]), np.max(loadf[:, 0]), 200)
 
-        pl.plot(massr, low(massr), 'r', lw=1, ls=linestyle[i])
-        pl.plot(massr, high(massr), 'r', lw=1, ls=linestyle[i])
+        ax.fill_between(massr, 10.**low(np.log10(massr)), 10.**high(np.log10(massr)),
+                        where=10.**high(np.log10(massr))>= 10.**low(np.log10(massr)),
+                        facecolor='blue', interpolate=True, alpha=0.2)
+        #pl.plot(massr, 10.**low(np.log10(massr)), 'r', lw=1, ls=linestyle[i])
+        #pl.plot(massr, 10.**high(np.log10(massr)), 'r', lw=1, ls=linestyle[i])
 
     ax.set_xlabel(r'$m_\chi$  [GeV]', fontsize=fs)
     ax.set_ylabel(r'$<\sigma {\rm v}>$  [$cm^{3} s^{-1}$]', fontsize=fs)
 
-    plt.xlim(xmin=10., xmax=100.)
+    plt.xlim(xmin=4., xmax=100.)
     plt.ylim(ymin=1.*10**-27., ymax=1.*10**-25.)
     ax.set_xscale("log")
     ax.set_yscale("log")
