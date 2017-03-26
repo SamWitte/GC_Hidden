@@ -99,6 +99,7 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
     mx = float(spec[findmx + 3:findGeV])
 
     if make_file:
+        print 'Make ChiSq Tabs'
         bf = chi_covariance(spec=spec, maj=maj, gamma=gamma, bf=True, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix)
 
         if os.path.isfile(file_name):
@@ -107,6 +108,7 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
         s_list = np.linspace(np.log10(s_low), np.log10(s_high), n_sigs)
         hold_tab = np.zeros((len(s_list), 2))
         for i, sig in enumerate(s_list):
+
             hold_tab[i] = chi_covariance(spec=spec, maj=maj, gamma=gamma, bf=False, sig=sig,
                                          scale_r=scale_r, rfix=rfix, rho_fix=rho_fix)
             print 'Sigma {:.2f}, ChiSq: {:.2f}'.format(sig, hold_tab[i, 1])
@@ -122,8 +124,8 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
         sl = np.zeros(len(contour_val))
         sh = np.zeros(len(contour_val))
 
-        bndsl = [(-100., bf[0])]
-        bndsh = [(bf[0], 0.)]
+        bndsl = [(-30., bf[0])]
+        bndsh = [(bf[0], -20.)]
 
         for j, cc in enumerate(contour_val):
             if bf[1] > (goal + cc):
