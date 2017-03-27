@@ -23,14 +23,23 @@ parser.add_argument('--contour_name', nargs='+', default=np.array(['_1Sigma', '_
 
 args = parser.parse_args()
 
+MASS_SCAN = False
+MX_MPHI_SCAN = False
+
 if args.maj == 'T':
     maj = True
 elif args.maj == 'F':
     maj = False
 
+if MASS_SCAN:
+    mass_scan(filef=args.filef, gamma=args.gamma, maj=True,
+              s_low=args.s_low, s_high=args.s_high, n_sigs=args.n_sigs,
+              contour_val=args.contour_val,
+              contour_name=args.contour_name,
+              scale_r=args.scale_r, rfix=args.rfix, rho_fix=args.rho_fix)
 
-mass_scan(filef=args.filef, gamma=args.gamma, maj=True,
-          s_low=args.s_low, s_high=args.s_high, n_sigs=args.n_sigs,
-          contour_val=args.contour_val,
-          contour_name=args.contour_name,
-          scale_r=args.scale_r, rfix=args.rfix, rho_fix=args.rho_fix)
+if MX_MPHI_SCAN:
+    mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
+                   scale_r=20., rfix=8.5, rho_fix=0.4)
+
+    
