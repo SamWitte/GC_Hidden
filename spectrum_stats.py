@@ -90,9 +90,9 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
                 print 'High: ', shch
 
                 if slch[2] == 0:
-                    sig_cnt[i, j] = slch[0][0]
+                    sig_cnt[i, j] = slch[0]
                 if shch[2] == 0:
-                    sig_cnt[i, j+len(contour_val)] = shch[0][0]
+                    sig_cnt[i, j+len(contour_val)] = shch[0]
 
     fnl_arr = np.insert(sig_cnt, 0, np.unique(mass_list[:, 1]), axis=-1)
     fnl_arr = fnl_arr[np.argsort(fnl_arr[:,0])]
