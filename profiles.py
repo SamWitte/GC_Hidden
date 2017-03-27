@@ -27,7 +27,7 @@ mpl.rcParams['xtick.labelsize']=18
 mpl.rcParams['ytick.labelsize']=18
 
 
-warnings.filterwarnings('error')
+#warnings.filterwarnings('error')
 
 try:
     MAIN_PATH = os.environ['GC_HIDDEN_PATH']
