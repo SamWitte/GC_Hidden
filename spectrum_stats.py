@@ -75,15 +75,16 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         bf_temp = bf_array[mass_list[:, 1] == mx]
 
         bf_fixmx = minimize(mono_min, np.array([mx - 4.]), args=(mx, goal_look2))
-        print 'Best fit point at mx {:.2f} is {:.2f}'.format(mx, bf_fixmx.fun)
+        print 'Best fit point at mx {:.2f} is {:.2f}, for mphi {:.2f}'.format(mx, bf_fixmx.fun, bf_fixmx.x)
         for j, cc in enumerate(contour_val):
+            print 'Goal: ', goal2.fun + cc
             if bf_fixmx.fun < (goal2.fun + cc):
-                if np.min(mph_u) < bf_fixmx.x < mx:
+                if np.min(mph_u) <= bf_fixmx.x <= mx:
                     slch = fminbound(mono_min, np.min(mph_u), bf_fixmx.x, full_output=True,
                                      args=(mx, goal_look2, cc + goal2.fun))
                     shch = fminbound(mono_min, bf_fixmx.x, mx, full_output=True,
                                      args=(mx, goal_look2, cc + goal2.fun))
-
+                    print 'Contour ChiSq: ', cc
                     print 'Low: ', slch
                     print 'High: ', shch
 
