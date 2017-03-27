@@ -55,7 +55,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         f_tail = f[f.find(filef):]
         bf_array[i] = sig_contour(spec=f_tail, gamma=gamma, maj=maj, scale_r=scale_r, rfix=rfix,
                                   rho_fix=rho_fix, ret_bf=True)
-    np.savetxt(MAIN_PATH + '/TEST_FILE.dat', np.stack((mass_list[:,0], mass_list[:,1], bf_array)))
+    np.savetxt(MAIN_PATH + '/TEST_FILE.dat', np.stack((mass_list[:,0], mass_list[:,1], bf_array)),axis=-1)
     goal_look = interp2d(mass_list[:, 0], mass_list[:, 1], bf_array, kind='cubic',
                          bounds_error=False, fill_value=1.e5)
     goal = minimize(goal_look, np.array([np.median(mass_list[:, 0]), np.median(mass_list[:, 1])]))
