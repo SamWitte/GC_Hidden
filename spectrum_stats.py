@@ -40,7 +40,8 @@ except KeyError:
 
 
 def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
-                   scale_r=20., rfix=8.5, rho_fix=0.4):
+                   scale_r=20., rfix=8.5, rho_fix=0.4,
+                   contour_val=np.array([2.3, 6.2, 11.8])):
     all_files = glob.glob(MAIN_PATH + '/Spectrum/' + filef + '*.dat')
 
     bf_array = np.zeros(len(all_files))
@@ -62,16 +63,35 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
     def bi_min(x, tcks):
         return bisplev(x[0],x[1], tcks)
 
+    def mono_min(mph, mx, tcks, dev=0.):
+        return np.abs(bisplev(mph, mx, tcks) - dev)
+
     goal2 = minimize(bi_min, np.array([np.median(mass_list[:, 0]), np.median(mass_list[:, 1])]), args=goal_look2)
 
-    goal_look3 = bisplrep(mass_list[:, 0], mass_list[:, 1], bf_array, kx=5, ky=5)
-    goal3 = minimize(bi_min, np.array([np.median(mass_list[:, 0]), np.median(mass_list[:, 1])]), args=goal_look3)
+    sig_cnt = np.zeros(len(np.unique(mass_list[:, 1])), 6)
 
+    for i, mx in enumerate(np.unique(mass_list[:, 1])):
+        mph_u = mass_list[:, 0][mass_list[:, 1] == mx]
+        bf_temp = bf_array[mass_list[:, 1] == mx]
 
-    print 'Try2'
-    print goal2
-    print 'Try3'
-    print goal3
+        bf_fixmx = minimize(mono_min, np.array([mx - 4.]), args=(mx, goal_look2))
+        print 'Best fit point at mx {:.2f} is {:.2f}'.format(mx, bf_fixmx.fun)
+        for j, cc in enumerate(contour_val):
+            if bf_fixmx.fun < (goal2.fun + cc):
+                if 20. < bf_fixmx.x < mx:
+                    slch = fminbound(mono_min, 20., bf_fixmx.x, full_output=True,
+                                     args=(mx, goal_look2, cc + goal2.fun))
+                    shch = fminbound(mono_min, bf_fixmx.x, mx, full_output=True,
+                                     args=(mx, goal_look2, cc + goal2.fun))
+                    print 'Low: {:.2f} High {:.2f}'.format(slch, shch)
+
+                    if slch[2] == 0:
+                        sig_cnt[i, j] = slch[0][0]
+                    if shch[2] == 0:
+                        sig_cnt[i, j+len(contour_val)] = shch[0][0]
+
+    print np.stack((np.unique(mass_list[:, 1]), sig_cnt), axis=-1)
+    np.savetxt('MX_MPHI_TEST.dat', np.stack((np.unique(mass_list[:, 1]), sig_cnt), axis=-1))
     return
 
 
