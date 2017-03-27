@@ -41,7 +41,8 @@ except KeyError:
 
 def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
                    scale_r=20., rfix=8.5, rho_fix=0.4,
-                   contour_val=np.array([2.3, 6.2, 11.8])):
+                   contour_val=np.array([2.3, 6.2, 11.8]),
+                   contour_name=np.array(['_1Sigma', '_2Sigma', '_3Sigma'])):
     all_files = glob.glob(MAIN_PATH + '/Spectrum/' + filef + '*.dat')
 
     bf_array = np.zeros(len(all_files))
@@ -97,7 +98,19 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
     fnl_arr = np.insert(sig_cnt, 0, np.unique(mass_list[:, 1]), axis=-1)
     fnl_arr = fnl_arr[np.argsort(fnl_arr[:,0])]
     print fnl_arr
-    np.savetxt('MX_MPHI_TEST.dat', fnl_arr)
+
+    print 'Saving Files...'
+
+    tot_contours = len(contour_name)
+    for i, cc in enumerate(contour_name):
+        c_fname = MAIN_PATH + '/FileHolding/Contours/' + filef + cc
+        c_fname += 'Gamma_{:.2f}_ScaleR_{:.2f}_Rfix_{:.2f}_RhoFix_{:.2f}'.format(gamma, scale_r, rfix, rho_fix)
+        c_fname += '.dat'
+        consv = np.stack((fnl_arr[:, 0], fnl_arr[:, i], fnl_arr[:, i + tot_contours]), axis=-1)
+        consv = consv[np.argsort(consv[:, 0])]
+        np.savetxt(c_fname, consv)
+
+    print 'Done.'
     return
 
 
