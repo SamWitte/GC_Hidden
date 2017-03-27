@@ -68,7 +68,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
 
     goal2 = minimize(bi_min, np.array([np.median(mass_list[:, 0]), np.median(mass_list[:, 1])]), args=goal_look2)
 
-    sig_cnt = np.zeros(len(np.unique(mass_list[:, 1])), 6)
+    sig_cnt = np.zeros((len(np.unique(mass_list[:, 1])), 6))
 
     for i, mx in enumerate(np.unique(mass_list[:, 1])):
         mph_u = mass_list[:, 0][mass_list[:, 1] == mx]
@@ -78,8 +78,8 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         print 'Best fit point at mx {:.2f} is {:.2f}'.format(mx, bf_fixmx.fun)
         for j, cc in enumerate(contour_val):
             if bf_fixmx.fun < (goal2.fun + cc):
-                if 20. < bf_fixmx.x < mx:
-                    slch = fminbound(mono_min, 20., bf_fixmx.x, full_output=True,
+                if np.min(mph_u) < bf_fixmx.x < mx:
+                    slch = fminbound(mono_min, np.min(mph_u), bf_fixmx.x, full_output=True,
                                      args=(mx, goal_look2, cc + goal2.fun))
                     shch = fminbound(mono_min, bf_fixmx.x, mx, full_output=True,
                                      args=(mx, goal_look2, cc + goal2.fun))
