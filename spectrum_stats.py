@@ -58,8 +58,8 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         bf_array[i] = sig_contour(spec=f_tail, gamma=gamma, maj=maj, scale_r=scale_r, rfix=rfix,
                                   rho_fix=rho_fix, ret_bf=True)
     #np.savetxt(MAIN_PATH + '/TEST_FILE.dat', np.stack((mass_list[:,0], mass_list[:,1], bf_array), axis=-1))
-
-    goal_look2 = bisplrep(mass_list[:, 0], mass_list[:, 1], bf_array, kx=3, ky=3)
+    print np.stack((mass_list[:, 0], mass_list[:, 1], bf_array), axis=-1)
+    goal_look2 = bisplrep(mass_list[:, 0], mass_list[:, 1], bf_array, kx=2, ky=2)
 
     def bi_min(x, tcks):
         return bisplev(x[0],x[1], tcks)
@@ -181,7 +181,7 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
                 s_low=5.e-27, s_high=5.e-26, n_sigs=10,
                 contour_val=np.array([2.3, 6.2, 11.8]),
                 scale_r=20., rfix=8.5, rho_fix=0.4, make_file=True,
-                goal=24., ret_bf=False):
+                goal=24., ret_bf=False, ret_cs=False):
 
     file_name = MAIN_PATH + '/FileHolding/Contours/ChiSq/Tabbed_ChiSq_'
     file_name += 'Gamma_{:.2f}_ScaleR_{:.2f}_Rfix_{:.2f}_RhoFix_{:.2f}'.format(gamma, scale_r, rfix, rho_fix)
@@ -193,7 +193,10 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
 
     if ret_bf:
         bf = chi_covariance(spec=spec, maj=maj, gamma=gamma, bf=True, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix)
-        return bf[-1]
+        if ret_cs:
+            return bf
+        else:
+            return bf[-1]
 
     if make_file:
 
