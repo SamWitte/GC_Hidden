@@ -57,7 +57,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
                                   rho_fix=rho_fix, ret_bf=True)
     #np.savetxt(MAIN_PATH + '/TEST_FILE.dat', np.stack((mass_list[:,0], mass_list[:,1], bf_array), axis=-1))
     goal_look = interp2d(mass_list[:, 0], mass_list[:, 1], bf_array, kind='linear',
-                         bounds_error=False, fill_value=1.e5)
+                         bounds_error=False)
     goal = minimize(goal_look, np.array([np.median(mass_list[:, 0]), np.median(mass_list[:, 1])]))
 
     goal_look2 = bisplrep(mass_list[:, 0], mass_list[:, 1], bf_array, kx=4, ky=4)
