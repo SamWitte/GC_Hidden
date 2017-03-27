@@ -81,9 +81,9 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         for j, cc in enumerate(contour_val):
             print 'Goal: ', goal2.fun + cc
             if bf_fixmx[1] < (goal2.fun + cc):
-                slch = fminbound(mono_min, np.min(mph_u), bf_fixmx[0][0], full_output=True,
+                slch = fminbound(mono_min, np.min(mph_u), bf_fixmx[0], full_output=True,
                                  args=(mx, goal_look2, cc + goal2.fun))
-                shch = fminbound(mono_min, bf_fixmx[0][0], mx, full_output=True,
+                shch = fminbound(mono_min, bf_fixmx[0], mx, full_output=True,
                                  args=(mx, goal_look2, cc + goal2.fun))
                 print 'Contour ChiSq: ', cc
                 print 'Low: ', slch
