@@ -76,7 +76,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
 
         d1interp = interp1d(mph_u, bf_temp, kind='cubic', bounds_error=False, fill_value=1e5)
         bf_fixmx = fminbound(d1interp, np.min(mph_u), np.max(mph_u))
-        print 'Best fit point at mx {:.2f} is {:.2f}'.format(mx, bf_fixmx[1])
+        print 'Best fit point at mx {:.2f} is'.format(mx)
         print bf_fixmx
         for j, cc in enumerate(contour_val):
             print 'Goal: ', goal2.fun + cc
