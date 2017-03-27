@@ -60,7 +60,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         print mass_list[i][0], mass_list[i][1], bf_array[i]
     #np.savetxt(MAIN_PATH + '/TEST_FILE.dat', np.stack((mass_list[:,0], mass_list[:,1], bf_array), axis=-1))
     #print np.stack((mass_list[:, 0], mass_list[:, 1], bf_array), axis=-1)
-    goal_look2 = bisplrep(np.log10(mass_list[:, 0]), np.log10(mass_list[:, 1]), np.log10(bf_array), kx=5, ky=5)
+    goal_look2 = bisplrep(np.log10(mass_list[:, 0]), np.log10(mass_list[:, 1]), np.log10(bf_array), kx=4, ky=4)
 
     def bi_min(x, tcks):
         return 10.**bisplev(np.log10(x[0]), np.log10(x[1]), tcks)
@@ -68,7 +68,8 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
     def mono_min(mph, mx, tcks, dev=0.):
         return np.abs(10.**bisplev(np.log10(mph), np.log10(mx), tcks) - dev)
 
-    goal2 = minimize(bi_min, np.array([np.median(mass_list[:, 0]), np.median(mass_list[:, 1])]), args=goal_look2)
+    #goal2 = minimize(bi_min, np.array([np.median(mass_list[:, 0]), np.median(mass_list[:, 1])]), args=goal_look2)
+    goal2 = np.min(bf_array)
 
     sig_cnt = np.zeros((len(np.unique(mass_list[:, 1])), 6))
 
@@ -81,12 +82,12 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         print 'Best fit point at mx {:.2f} is'.format(mx)
         print bf_fixmx
         for j, cc in enumerate(contour_val):
-            print 'Goal: ', goal2.fun + cc
-            if bf_fixmx[1] < (goal2.fun + cc):
+            print 'Goal: ', goal2 + cc
+            if bf_fixmx[1] < (goal2 + cc):
                 slch = fminbound(mono_min, np.min(mph_u), bf_fixmx[0], full_output=True,
-                                 args=(mx, goal_look2, cc + goal2.fun))
+                                 args=(mx, goal_look2, cc + goal2))
                 shch = fminbound(mono_min, bf_fixmx[0], mx, full_output=True,
-                                 args=(mx, goal_look2, cc + goal2.fun))
+                                 args=(mx, goal_look2, cc + goal2))
                 print 'Contour ChiSq: ', cc
                 print 'Low: ', slch
                 print 'High: ', shch
@@ -399,8 +400,8 @@ def plot_model_vs_data(log_s, spec='BB_direct_mx_50GeV.dat', maj=True, gamma=1.2
     plt.plot(model[:, 0], model[:,1], color='blue')
     plt.plot(gce_dat[:, 0], gce_dat[:, 1], 'o', mfc='r')
     
-    sigma = build_covariance_matrix(gce_file[:,1], gce_file[:,3], gce_file[:, 2],
-                                    dim=len(n_obs))
+    #sigma = build_covariance_matrix(gce_file[:,1], gce_file[:,3], gce_file[:, 2],
+    #                                dim=len(n_obs))
     cor_er = np.zeros(len(gce_file[:, 0]))
     for i in range(len(gce_file[:, 0])):
         eng = gce_file[i, 1]
