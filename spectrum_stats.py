@@ -53,13 +53,14 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         findGeV = f.find('GeV')
         findmphi = f.find('mphi_')
         mass_list[i] = [np.float(f[findmphi + 5:(findmx - 1)]), np.float(f[findmx + 3:findGeV])]
-        print 'Mphi {:.2f}, Mx {:.2f}'.format(mass_list[i][0],mass_list[i][1])
+        print 'Mphi, Mx, BF'
         f_tail = f[f.find(filef):]
         bf_array[i] = sig_contour(spec=f_tail, gamma=gamma, maj=maj, scale_r=scale_r, rfix=rfix,
                                   rho_fix=rho_fix, ret_bf=True)
+        print mass_list[i][0], mass_list[i][1], bf_array[i]
     #np.savetxt(MAIN_PATH + '/TEST_FILE.dat', np.stack((mass_list[:,0], mass_list[:,1], bf_array), axis=-1))
-    print np.stack((mass_list[:, 0], mass_list[:, 1], bf_array), axis=-1)
-    goal_look2 = bisplrep(mass_list[:, 0], mass_list[:, 1], bf_array, kx=2, ky=2)
+    #print np.stack((mass_list[:, 0], mass_list[:, 1], bf_array), axis=-1)
+    goal_look2 = bisplrep(mass_list[:, 0], mass_list[:, 1], bf_array, kx=1, ky=1)
 
     def bi_min(x, tcks):
         return bisplev(x[0],x[1], tcks)
@@ -94,9 +95,10 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
                     sig_cnt[i, j] = slch[0]
                 if shch[2] == 0:
                     sig_cnt[i, j+len(contour_val)] = shch[0]
+            print 'mx: ', mx, ' mphi contours: ', sig_cnt[i]
 
     fnl_arr = np.insert(sig_cnt, 0, np.unique(mass_list[:, 1]), axis=-1)
-    fnl_arr = fnl_arr[np.argsort(fnl_arr[:,0])]
+    fnl_arr = fnl_arr[np.argsort(fnl_arr[:, 0])]
     print fnl_arr
 
     print 'Saving Files...'
@@ -391,36 +393,34 @@ def plot_model_vs_data(log_s, spec='BB_direct_mx_50GeV.dat', maj=True, gamma=1.2
     fig = plt.figure()
     ax = plt.gca()
 
-    # Why does my minimzation currently give md2...
-    md2 = model[:,0]**2. * 10.**(-25.506) * model[:,1]
-
     model[:,1] = model[:,0]**2. * 10.**log_s * model[:,1]
 
     # plot data points
     plt.plot(model[:, 0], model[:,1], color='blue')
-    plt.plot(model[:, 0], md2, '--', color='blue')
     plt.plot(gce_dat[:, 0], gce_dat[:, 1], 'o', mfc='r')
     
     sigma = build_covariance_matrix(gce_file[:,1], gce_file[:,3], gce_file[:, 2],
                                     dim=len(n_obs))
+    cor_er = np.zeros(len(gce_file[:, 0]))
     for i in range(len(gce_file[:, 0])):
         eng = gce_file[i, 1]
-        cor_er = np.sqrt((pc_error(gce_file[i, 1],gce_file[i, 1]) * eng**4.) + gce_file[i, 3]**2.)
-        #cor_er = np.sqrt(sigma[i,i])
-        #print gce_file[i, 1], cor_er, pc_error(gce_file[i, 1])* eng**2., gce_file[i, 3]
+        cor_er[i] = np.sqrt((pc_error(gce_file[i, 1], gce_file[i, 1]) * eng**4.) + gce_file[i, 3]**2.)
+
         if (gce_dat[i, 1] - gce_file[i, 3]) > 0.:
             ylow = np.log10((gce_dat[i, 1] - gce_file[i, 3]) / ylims[0]) / np.log10(ylims[1]/ylims[0])
         else:
             ylow = 0.
         yhigh = np.log10((gce_dat[i,1] + gce_file[i,3]) / ylims[0]) / np.log10(ylims[1]/ylims[0])
 
-        if (gce_dat[i,1] - cor_er) > 0.:
-            ylow2 = np.log10((gce_dat[i, 1] - cor_er) / ylims[0]) / np.log10(ylims[1]/ylims[0])
+        if (gce_dat[i,1] - cor_er[i]) > 0.:
+            ylow2 = np.log10((gce_dat[i, 1] - cor_er[i]) / ylims[0]) / np.log10(ylims[1]/ylims[0])
         else:
             ylow2 = 0.
-        yhigh2 = np.log10((gce_dat[i, 1] + cor_er) / ylims[0]) / np.log10(ylims[1]/ylims[0])
+        yhigh2 = np.log10((gce_dat[i, 1] + cor_er[i]) / ylims[0]) / np.log10(ylims[1]/ylims[0])
         plt.axvline(x=gce_file[i, 1], ymin=ylow2, ymax=yhigh2, linewidth=4, color='y',alpha=0.4)
         plt.axvline(x=gce_file[i, 1], ymin=ylow, ymax=yhigh, linewidth=1, color='k')
+
+    np.savetxt(MAIN_PATH + '/FileHolding/Diag_System_Err.dat', cor_er)
 
     ax.set_xscale('log')
     ax.set_yscale('log')
