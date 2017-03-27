@@ -74,28 +74,30 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         mph_u = mass_list[:, 0][mass_list[:, 1] == mx]
         bf_temp = bf_array[mass_list[:, 1] == mx]
 
-        bf_fixmx = minimize(mono_min, np.array([mx - 4.]), args=(mx, goal_look2))
-        print 'Best fit point at mx {:.2f} is {:.2f}'.format(mx, bf_fixmx.fun)
+        d1interp = interp1d(mph_u, bf_temp, kind='cubic', bounds_error=False, fill_value=1e5)
+        bf_fixmx = fminbound(d1interp, np.min(mph_u), np.max(mph_u), args=(mx, goal_look2))
+        print 'Best fit point at mx {:.2f} is {:.2f}'.format(mx, bf_fixmx[1])
         print bf_fixmx
         for j, cc in enumerate(contour_val):
             print 'Goal: ', goal2.fun + cc
-            if bf_fixmx.fun < (goal2.fun + cc):
-                if np.min(mph_u) <= bf_fixmx.x <= mx:
-                    slch = fminbound(mono_min, np.min(mph_u), bf_fixmx.x, full_output=True,
-                                     args=(mx, goal_look2, cc + goal2.fun))
-                    shch = fminbound(mono_min, bf_fixmx.x, mx, full_output=True,
-                                     args=(mx, goal_look2, cc + goal2.fun))
-                    print 'Contour ChiSq: ', cc
-                    print 'Low: ', slch
-                    print 'High: ', shch
+            if bf_fixmx[1] < (goal2.fun + cc):
+                slch = fminbound(mono_min, np.min(mph_u), bf_fixmx[0][0], full_output=True,
+                                 args=(mx, goal_look2, cc + goal2.fun))
+                shch = fminbound(mono_min, bf_fixmx[0][0], mx, full_output=True,
+                                 args=(mx, goal_look2, cc + goal2.fun))
+                print 'Contour ChiSq: ', cc
+                print 'Low: ', slch
+                print 'High: ', shch
 
-                    if slch[2] == 0:
-                        sig_cnt[i, j] = slch[0][0]
-                    if shch[2] == 0:
-                        sig_cnt[i, j+len(contour_val)] = shch[0][0]
+                if slch[2] == 0:
+                    sig_cnt[i, j] = slch[0][0]
+                if shch[2] == 0:
+                    sig_cnt[i, j+len(contour_val)] = shch[0][0]
 
-    print np.stack((np.unique(mass_list[:, 1]), sig_cnt), axis=-1)
-    np.savetxt('MX_MPHI_TEST.dat', np.stack((np.unique(mass_list[:, 1]), sig_cnt), axis=-1))
+    fnl_arr = np.insert(sig_cnt, 0, np.unique(mass_list[:, 1]), axis=-1)
+    fnl_arr = fnl_arr[np.argsort(fnl_arr[:,0])]
+    print fnl_arr
+    np.savetxt('MX_MPHI_TEST.dat', fnl_arr)
     return
 
 
