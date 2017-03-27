@@ -8,7 +8,7 @@
 
 import numpy as np
 from scipy.integrate import quad
-from scipy.interpolate import interp1d, UnivariateSpline
+from scipy.interpolate import interp1d, UnivariateSpline, interp2d
 from scipy.optimize import minimize
 import os
 import matplotlib as mpl
@@ -37,6 +37,30 @@ except KeyError:
 
 # File Contents of GC_stats.dat:
 # E_low, E_mid, E_high, Stat err
+
+
+def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
+                   scale_r=20., rfix=8.5, rho_fix=0.4):
+    all_files = glob.glob(MAIN_PATH + '/Spectrum/' + filef + '*.dat')
+
+    bf_array = np.zeros(len(all_files))
+    # Order Mphi, Mx
+    mass_list = np.zeros((len(all_files), 2))
+    for i, f in enumerate(all_files):
+        findmx = f.find('mx_')
+        findGeV = f.find('GeV')
+        findmphi = f.find('mphi_')
+        mass_list[i] = [np.float(f[findmphi + 5:(findmx - 1)]), np.float(f[findmx + 3:findGeV])]
+        print 'Mphi {:.2f}, Mx {:.2f}'.format(mass_list[i][0],mass_list[i][1])
+        f_tail = f[f.find(filef):]
+        bf_array[i] = sig_contour(spec=f_tail, gamma=gamma, maj=maj, scale_r=scale_r, rfix=rfix,
+                                  rho_fix=rho_fix, ret_bf=True)
+
+    goal_look = interp2d(mass_list[:, 0], mass_list[:, 1], bf_array, kind='cubic',
+                         bounds_error=False, fill_value=1.e5)
+    goal = minimize(goal_look, np.array([np.median(mass_list[:, 0]), np.median(mass_list[:, 1])]))
+    print goal
+    return
 
 
 def mass_scan(filef='BB_direct_mx_', gamma=1.2, maj=True, s_low=5.e-27,
@@ -106,7 +130,7 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
                 s_low=5.e-27, s_high=5.e-26, n_sigs=10,
                 contour_val=np.array([2.3, 6.2, 11.8]),
                 scale_r=20., rfix=8.5, rho_fix=0.4, make_file=True,
-                goal=24.):
+                goal=24., ret_bf=False):
 
     file_name = MAIN_PATH + '/FileHolding/Contours/ChiSq/Tabbed_ChiSq_'
     file_name += 'Gamma_{:.2f}_ScaleR_{:.2f}_Rfix_{:.2f}_RhoFix_{:.2f}'.format(gamma, scale_r, rfix, rho_fix)
@@ -115,6 +139,10 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
     findmx = spec.find('mx_')
     findGeV = spec.find('GeV')
     mx = float(spec[findmx + 3:findGeV])
+
+    if ret_bf:
+        bf = chi_covariance(spec=spec, maj=maj, gamma=gamma, bf=True, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix)
+        return bf[-1]
 
     if make_file:
 
