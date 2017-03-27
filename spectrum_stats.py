@@ -58,10 +58,14 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
     #np.savetxt(MAIN_PATH + '/TEST_FILE.dat', np.stack((mass_list[:,0], mass_list[:,1], bf_array), axis=-1))
 
     goal_look2 = bisplrep(mass_list[:, 0], mass_list[:, 1], bf_array, kx=4, ky=4)
-    goal2 = minimize(bisplev, np.array([np.median(mass_list[:, 0]), np.median(mass_list[:, 1])]), args=goal_look2)
+
+    def bi_min(x, tcks):
+        return bisplev(x[0],x[1], tcks)
+
+    goal2 = minimize(bi_min, np.array([np.median(mass_list[:, 0]), np.median(mass_list[:, 1])]), args=goal_look2)
 
     goal_look3 = bisplrep(mass_list[:, 0], mass_list[:, 1], bf_array, kx=5, ky=5)
-    goal3 = minimize(bisplev, np.array([np.median(mass_list[:, 0]), np.median(mass_list[:, 1])]), args=goal_look3)
+    goal3 = minimize(bi_min, np.array([np.median(mass_list[:, 0]), np.median(mass_list[:, 1])]), args=goal_look3)
 
 
     print 'Try2'
