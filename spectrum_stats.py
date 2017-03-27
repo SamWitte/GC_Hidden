@@ -83,7 +83,9 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
                                      args=(mx, goal_look2, cc + goal2.fun))
                     shch = fminbound(mono_min, bf_fixmx.x, mx, full_output=True,
                                      args=(mx, goal_look2, cc + goal2.fun))
-                    print 'Low: {:.2f} High {:.2f}'.format(slch, shch)
+
+                    print 'Low: ', slch
+                    print 'High: ', shch
 
                     if slch[2] == 0:
                         sig_cnt[i, j] = slch[0][0]
