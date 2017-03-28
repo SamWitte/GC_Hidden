@@ -79,6 +79,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
 
     mx_interp = interp1d(mxlist, mx_bflist[:, 1], kind='cubic', bounds_error=False, fill_value=1e5)
     overbf = minimize(mx_interp, np.array([np.median(mxlist)]), tol=1.e-4)
+    print '~~~~~~~~~~~~~~~~~~~~~~~~\n'
     print 'Overall Best Fit:'
     print overbf
     goal = overbf.fun
@@ -90,12 +91,29 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
             if mx_bflist[i, 1] < cc:
                 mph_u = mass_list[:, 0][mass_list[:, 1] == mx]
                 bf_temp = bf_array[mass_list[:, 1] == mx]
+                ordr = np.argsort(mph_u)
+                mph_u = mph_u[ordr]
+                bf_temp = bf_temp[ordr]
+                agmin = np.argmin(bf_temp)
+
                 bf_temp += - cc
                 bf_temp = np.abs(bf_temp)
-                d1interp = interp1d(mph_u, bf_temp, kind='cubic', bounds_error=False, fill_value=1e5)
+
+
+                try:
+                    d1interp = interp1d(mph_u[:agmin+1], bf_temp[:agmin+1], kind='cubic',
+                                        bounds_error=False, fill_value=1e5)
+                except:
+                    d1interp = interp1d(mph_u, bf_temp, kind='linear', bounds_error=False, fill_value='extrapolate')
+                try:
+                    d2interp = interp1d(mph_u[agmin - 1:], bf_temp[agmin -1:], kind='cubic',
+                                    bounds_error=False, fill_value=1e5)
+                except:
+                    d2interp = interp1d(mph_u, bf_temp, kind='linear', bounds_error=False, fill_value='extrapolate')
+
                 print 'Contour ChiSq: ', cc
 
-                if d1interp(np.min(mph_u)) < cc:
+                if bf_temp[0] < cc:
                     sig_cnt[i, j] = 0.
                     print 'Low: ', 0.
                 else:
@@ -103,11 +121,11 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
                     sig_cnt[i, j] = slch[0]
                     print 'Low: ', slch
 
-                if d1interp(np.max(mph_u)) < cc:
+                if bf_temp[-1] < cc:
                     sig_cnt[i, j + tot_contours] = mx
                     print 'High: ', mx
                 else:
-                    shch = fminbound(d1interp, mx_bflist[i, 0], np.max(mph_u), full_output=True, xtol=1e-3)
+                    shch = fminbound(d2interp, mx_bflist[i, 0], np.max(mph_u), full_output=True, xtol=1e-3)
                     sig_cnt[i, j + tot_contours] = shch[0]
                     print 'High: ', shch
 
@@ -124,7 +142,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         c_fname += '.dat'
         consv = np.column_stack((fnl_arr[:, 0], fnl_arr[:, i+1], fnl_arr[:, i+1+tot_contours]))
         consv = consv[np.argsort(consv[:, 0])]
-        consv = consv[consv[:, 1] > 0.]
+        consv = consv[consv[:, -1] > 0.]
         np.savetxt(c_fname, consv)
 
     print 'Done.'
