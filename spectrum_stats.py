@@ -72,7 +72,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         bf_temp = bf_temp[ordr]
 
         d1interp = interp1d(mph_u, bf_temp, kind='cubic', bounds_error=False, fill_value=1e5)
-        bf_fixmx = minimize(d1interp, np.array([np.median(mph_u)]), tol=1.e-4)
+        bf_fixmx = minimize(d1interp, np.array([np.median(mph_u)]), tol=1.e-3)
         print 'Best fit point at mx {:.2f} is'.format(mx)
         print bf_fixmx
         mx_bflist[i] = [bf_fixmx.x, bf_fixmx.fun]
@@ -98,7 +98,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
                 #bf_temp += - cc
                 #bf_temp = np.abs(bf_temp)
 
-                d1interp = lambda x: np.abs(10.**interp1d(mph_u, np.log10(bf_temp), kind='cubic',
+                d1interp = lambda x: np.abs(10.**interp1d(np.log10(mph_u), np.log10(bf_temp), kind='cubic',
                                                    bounds_error=False, fill_value=1e5)(np.log10(x)) - cc)
 
                 print 'Contour ChiSq: ', cc
