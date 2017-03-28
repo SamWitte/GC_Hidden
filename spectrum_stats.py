@@ -93,15 +93,24 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
                 bf_temp += - cc
                 bf_temp = np.abs(bf_temp)
                 d1interp = interp1d(mph_u, bf_temp, kind='cubic', bounds_error=False, fill_value=1e5)
-
-                slch = fminbound(d1interp, np.min(mph_u), mx_bflist[i, 0], full_output=True, xtol=1e-3)
-                shch = fminbound(d1interp, mx_bflist[i, 0], mx, full_output=True, xtol=1e-3)
                 print 'Contour ChiSq: ', cc
-                print 'Low: ', slch
-                print 'High: ', shch
 
-                sig_cnt[i, j] = slch[0]
-                sig_cnt[i, j+tot_contours] = shch[0]
+                if d1interp(np.min(mph_u)) < cc:
+                    sig_cnt[i, j] = 0.
+                    print 'Low: ', 0.
+                else:
+                    slch = fminbound(d1interp, np.min(mph_u), mx_bflist[i, 0], full_output=True, xtol=1e-3)
+                    sig_cnt[i, j] = slch[0]
+                    print 'Low: ', slch
+
+                if d1interp(np.max(mph_u)) < cc:
+                    sig_cnt[i, j + tot_contours] = mx
+                    print 'High: ', mx
+                else:
+                    shch = fminbound(d1interp, mx_bflist[i, 0], np.max(mph_u), full_output=True, xtol=1e-3)
+                    sig_cnt[i, j + tot_contours] = shch[0]
+                    print 'High: ', shch
+
             print 'mx: ', mx, ' mphi contours: ', sig_cnt[i]
 
     fnl_arr = np.column_stack((mxlist, sig_cnt))
@@ -109,13 +118,13 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
 
     print 'Saving Files...'
 
-
     for i, cc in enumerate(contour_name):
         c_fname = MAIN_PATH + '/FileHolding/Contours/' + filef + cc
         c_fname += 'Gamma_{:.2f}_ScaleR_{:.2f}_Rfix_{:.2f}_RhoFix_{:.2f}'.format(gamma, scale_r, rfix, rho_fix)
         c_fname += '.dat'
         consv = np.column_stack((fnl_arr[:, 0], fnl_arr[:, i+1], fnl_arr[:, i+1+tot_contours]))
         consv = consv[np.argsort(consv[:, 0])]
+        consv = consv[consv[:, 1] > 0.]
         np.savetxt(c_fname, consv)
 
     print 'Done.'
