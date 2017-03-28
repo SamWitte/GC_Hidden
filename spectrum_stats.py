@@ -94,22 +94,12 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
                 ordr = np.argsort(mph_u)
                 mph_u = mph_u[ordr]
                 bf_temp = bf_temp[ordr]
-                agmin = np.argmin(bf_temp)
 
-                bf_temp += - cc
-                bf_temp = np.abs(bf_temp)
+                #bf_temp += - cc
+                #bf_temp = np.abs(bf_temp)
 
-
-                try:
-                    d1interp = interp1d(mph_u[:agmin+1], bf_temp[:agmin+1], kind='cubic',
-                                        bounds_error=False, fill_value=1e5)
-                except:
-                    d1interp = interp1d(mph_u, bf_temp, kind='linear', bounds_error=False, fill_value='extrapolate')
-                try:
-                    d2interp = interp1d(mph_u[agmin - 1:], bf_temp[agmin -1:], kind='cubic',
-                                    bounds_error=False, fill_value=1e5)
-                except:
-                    d2interp = interp1d(mph_u, bf_temp, kind='linear', bounds_error=False, fill_value='extrapolate')
+                d1interp = lambda x: np.abs(10.**interp1d(mph_u, np.log10(bf_temp), kind='cubic',
+                                                   bounds_error=False, fill_value=1e5)(np.log10(x)) - cc)
 
                 print 'Contour ChiSq: ', cc
 
@@ -125,7 +115,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
                     sig_cnt[i, j + tot_contours] = mx
                     print 'High: ', mx
                 else:
-                    shch = fminbound(d2interp, mx_bflist[i, 0], np.max(mph_u), full_output=True, xtol=1e-3)
+                    shch = fminbound(d1interp, mx_bflist[i, 0], np.max(mph_u), full_output=True, xtol=1e-3)
                     sig_cnt[i, j + tot_contours] = shch[0]
                     print 'High: ', shch
 
