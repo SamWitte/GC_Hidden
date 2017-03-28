@@ -9,7 +9,7 @@
 import numpy as np
 from scipy.integrate import quad
 from scipy.interpolate import interp1d, UnivariateSpline, interp2d, bisplev, bisplrep
-from scipy.optimize import minimize
+from scipy.optimize import minimize, fsolve
 import os
 import matplotlib as mpl
 import pylab as pl
@@ -58,36 +58,40 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         bf_array[i] = sig_contour(spec=f_tail, gamma=gamma, maj=maj, scale_r=scale_r, rfix=rfix,
                                   rho_fix=rho_fix, ret_bf=True)
         print mass_list[i][0], mass_list[i][1], bf_array[i]
-    #np.savetxt(MAIN_PATH + '/TEST_FILE.dat', np.stack((mass_list[:,0], mass_list[:,1], bf_array), axis=-1))
-    #print np.stack((mass_list[:, 0], mass_list[:, 1], bf_array), axis=-1)
-    goal_look2 = bisplrep(np.log10(mass_list[:, 0]), np.log10(mass_list[:, 1]), np.log10(bf_array), kx=4, ky=4)
 
-    def bi_min(x, tcks):
-        return 10.**bisplev(np.log10(x[0]), np.log10(x[1]), tcks)
+    mxlist = np.unique(mass_list[:, 1])
+    mx_bflist = np.zeros(len(mxlist), 2)
 
-    def mono_min(mph, mx, tcks, dev=0.):
-        return np.abs(10.**bisplev(np.log10(mph), np.log10(mx), tcks) - dev)
+    sig_cnt = np.zeros((len(mxlist), 6))
 
-    #goal2 = minimize(bi_min, np.array([np.median(mass_list[:, 0]), np.median(mass_list[:, 1])]), args=goal_look2)
-    goal2 = np.min(bf_array)
-
-    sig_cnt = np.zeros((len(np.unique(mass_list[:, 1])), 6))
-
-    for i, mx in enumerate(np.unique(mass_list[:, 1])):
+    for i, mx in enumerate(mxlist):
         mph_u = mass_list[:, 0][mass_list[:, 1] == mx]
         bf_temp = bf_array[mass_list[:, 1] == mx]
 
         d1interp = interp1d(mph_u, bf_temp, kind='cubic', bounds_error=False, fill_value=1e5)
-        bf_fixmx = fminbound(d1interp, np.min(mph_u), np.max(mph_u), full_output=True)
+        bf_fixmx = minimize(d1interp, np.array([np.median(mph_u)]), tol=1.e-4)
         print 'Best fit point at mx {:.2f} is'.format(mx)
         print bf_fixmx
+        mx_bflist[i] = [bf_fixmx.x, bf_fixmx.fun]
+
+    mx_interp = interp1d(mxlist, mx_bflist[:, 2], kind='cubic', bounds_error=False, fill_value=1e5)
+    overbf = minimize(mx_interp, np.array([np.median(mxlist)]), tol=1.e-4)
+    print 'Overall Best Fit:'
+    print overbf
+    goal = overbf.fun
+
+    for i, mx in enumerate(mxlist):
         for j, cc in enumerate(contour_val):
-            print 'Goal: ', goal2 + cc
-            if bf_fixmx[1] < (goal2 + cc):
-                slch = fminbound(mono_min, np.min(mph_u), bf_fixmx[0], full_output=True,
-                                 args=(mx, goal_look2, cc + goal2))
-                shch = fminbound(mono_min, bf_fixmx[0], mx, full_output=True,
-                                 args=(mx, goal_look2, cc + goal2))
+            print 'Goal: ', goal + cc
+            if mx_bflist[1] < (goal + cc):
+                mph_u = mass_list[:, 0][mass_list[:, 1] == mx]
+                bf_temp = bf_array[mass_list[:, 1] == mx]
+                bf_temp += - (goal + cc)
+                d1interp = interp1d(mph_u, bf_temp, kind='cubic', bounds_error=False, fill_value=1e5)
+
+                #
+                slch = fminbound(d1interp, np.min(mph_u), mx_bflist[0], full_output=True)
+                shch = fminbound(d1interp, mx_bflist[0], mx, full_output=True)
                 print 'Contour ChiSq: ', cc
                 print 'Low: ', slch
                 print 'High: ', shch
@@ -98,8 +102,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
                     sig_cnt[i, j+len(contour_val)] = shch[0]
             print 'mx: ', mx, ' mphi contours: ', sig_cnt[i]
 
-    fnl_arr = np.insert(sig_cnt, 0, np.unique(mass_list[:, 1]), axis=-1)
-    fnl_arr = fnl_arr[np.argsort(fnl_arr[:, 0])]
+    fnl_arr = np.column_stack((mxlist, sig_cnt))
     print fnl_arr
 
     print 'Saving Files...'
@@ -109,7 +112,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         c_fname = MAIN_PATH + '/FileHolding/Contours/' + filef + cc
         c_fname += 'Gamma_{:.2f}_ScaleR_{:.2f}_Rfix_{:.2f}_RhoFix_{:.2f}'.format(gamma, scale_r, rfix, rho_fix)
         c_fname += '.dat'
-        consv = np.stack((fnl_arr[:, 0], fnl_arr[:, i], fnl_arr[:, i + tot_contours]), axis=-1)
+        consv = np.column_stack((fnl_arr[:, 0], fnl_arr[:, i+1], fnl_arr[:, i + tot_contours + 1]))
         consv = consv[np.argsort(consv[:, 0])]
         np.savetxt(c_fname, consv)
 
