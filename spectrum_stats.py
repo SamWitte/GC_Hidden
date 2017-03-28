@@ -60,7 +60,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         print mass_list[i][0], mass_list[i][1], bf_array[i]
 
     mxlist = np.unique(mass_list[:, 1])
-    mx_bflist = np.zeros(len(mxlist), 2)
+    mx_bflist = np.zeros((len(mxlist), 2))
 
     sig_cnt = np.zeros((len(mxlist), 6))
 
