@@ -67,6 +67,9 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
     for i, mx in enumerate(mxlist):
         mph_u = mass_list[:, 0][mass_list[:, 1] == mx]
         bf_temp = bf_array[mass_list[:, 1] == mx]
+        ordr = np.argsort(mph_u)
+        mph_u = mph_u[ordr]
+        bf_temp = bf_temp[ordr]
 
         d1interp = interp1d(mph_u, bf_temp, kind='cubic', bounds_error=False, fill_value=1e5)
         bf_fixmx = minimize(d1interp, np.array([np.median(mph_u)]), tol=1.e-4)
