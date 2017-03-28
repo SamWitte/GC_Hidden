@@ -80,6 +80,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
     print overbf
     goal = overbf.fun
 
+    tot_contours = len(contour_name)
     for i, mx in enumerate(mxlist):
         for j, cc in enumerate(contour_val):
             print 'Goal: ', goal + cc
@@ -87,9 +88,9 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
                 mph_u = mass_list[:, 0][mass_list[:, 1] == mx]
                 bf_temp = bf_array[mass_list[:, 1] == mx]
                 bf_temp += - (goal + cc)
+                bf_temp = np.abs(bf_temp)
                 d1interp = interp1d(mph_u, bf_temp, kind='cubic', bounds_error=False, fill_value=1e5)
 
-                #
                 slch = fminbound(d1interp, np.min(mph_u), mx_bflist[i, 0], full_output=True)
                 shch = fminbound(d1interp, mx_bflist[i, 0], mx, full_output=True)
                 print 'Contour ChiSq: ', cc
@@ -99,7 +100,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
                 if slch[2] == 0:
                     sig_cnt[i, j] = slch[0]
                 if shch[2] == 0:
-                    sig_cnt[i, j+len(contour_val)] = shch[0]
+                    sig_cnt[i, j+tot_contours] = shch[0]
             print 'mx: ', mx, ' mphi contours: ', sig_cnt[i]
 
     fnl_arr = np.column_stack((mxlist, sig_cnt))
@@ -107,12 +108,12 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
 
     print 'Saving Files...'
 
-    tot_contours = len(contour_name)
+
     for i, cc in enumerate(contour_name):
         c_fname = MAIN_PATH + '/FileHolding/Contours/' + filef + cc
         c_fname += 'Gamma_{:.2f}_ScaleR_{:.2f}_Rfix_{:.2f}_RhoFix_{:.2f}'.format(gamma, scale_r, rfix, rho_fix)
         c_fname += '.dat'
-        consv = np.column_stack((fnl_arr[:, 0], fnl_arr[:, i+1], fnl_arr[:, i + tot_contours + 1]))
+        consv = np.column_stack((fnl_arr[:, 0], fnl_arr[:, i+1], fnl_arr[:, i+1+tot_contours]))
         consv = consv[np.argsort(consv[:, 0])]
         np.savetxt(c_fname, consv)
 
