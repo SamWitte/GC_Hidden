@@ -83,15 +83,15 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
     for i, mx in enumerate(mxlist):
         for j, cc in enumerate(contour_val):
             print 'Goal: ', goal + cc
-            if mx_bflist[1] < (goal + cc):
+            if mx_bflist[i, 1] < (goal + cc):
                 mph_u = mass_list[:, 0][mass_list[:, 1] == mx]
                 bf_temp = bf_array[mass_list[:, 1] == mx]
                 bf_temp += - (goal + cc)
                 d1interp = interp1d(mph_u, bf_temp, kind='cubic', bounds_error=False, fill_value=1e5)
 
                 #
-                slch = fminbound(d1interp, np.min(mph_u), mx_bflist[0], full_output=True)
-                shch = fminbound(d1interp, mx_bflist[0], mx, full_output=True)
+                slch = fminbound(d1interp, np.min(mph_u), mx_bflist[i, 0], full_output=True)
+                shch = fminbound(d1interp, mx_bflist[i, 0], mx, full_output=True)
                 print 'Contour ChiSq: ', cc
                 print 'Low: ', slch
                 print 'High: ', shch
