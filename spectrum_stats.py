@@ -74,7 +74,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         print bf_fixmx
         mx_bflist[i] = [bf_fixmx.x, bf_fixmx.fun]
 
-    mx_interp = interp1d(mxlist, mx_bflist[:, 2], kind='cubic', bounds_error=False, fill_value=1e5)
+    mx_interp = interp1d(mxlist, mx_bflist[:, 1], kind='cubic', bounds_error=False, fill_value=1e5)
     overbf = minimize(mx_interp, np.array([np.median(mxlist)]), tol=1.e-4)
     print 'Overall Best Fit:'
     print overbf
