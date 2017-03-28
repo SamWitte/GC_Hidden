@@ -41,8 +41,8 @@ except KeyError:
 
 def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
                    scale_r=20., rfix=8.5, rho_fix=0.4,
-                   contour_val=np.array([2.3, 6.2, 11.8]),
-                   contour_name=np.array(['_1Sigma', '_2Sigma', '_3Sigma'])):
+                   contour_val=np.array([26.66, 33.15, 36.4]),
+                   contour_name=np.array(['_p32', '_p10', '_p05'])):
     all_files = glob.glob(MAIN_PATH + '/Spectrum/' + filef + '*.dat')
 
     bf_array = np.zeros(len(all_files))
@@ -83,24 +83,22 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
     tot_contours = len(contour_name)
     for i, mx in enumerate(mxlist):
         for j, cc in enumerate(contour_val):
-            print 'Goal: ', goal + cc
-            if mx_bflist[i, 1] < (goal + cc):
+            print 'Goal: ', cc
+            if mx_bflist[i, 1] < cc:
                 mph_u = mass_list[:, 0][mass_list[:, 1] == mx]
                 bf_temp = bf_array[mass_list[:, 1] == mx]
-                bf_temp += - (goal + cc)
+                bf_temp += - cc
                 bf_temp = np.abs(bf_temp)
                 d1interp = interp1d(mph_u, bf_temp, kind='cubic', bounds_error=False, fill_value=1e5)
 
-                slch = fminbound(d1interp, np.min(mph_u), mx_bflist[i, 0], full_output=True)
-                shch = fminbound(d1interp, mx_bflist[i, 0], mx, full_output=True)
+                slch = fminbound(d1interp, np.min(mph_u), mx_bflist[i, 0], full_output=True, xtol=1e-3)
+                shch = fminbound(d1interp, mx_bflist[i, 0], mx, full_output=True, xtol=1e-3)
                 print 'Contour ChiSq: ', cc
                 print 'Low: ', slch
                 print 'High: ', shch
 
-                if slch[2] == 0:
-                    sig_cnt[i, j] = slch[0]
-                if shch[2] == 0:
-                    sig_cnt[i, j+tot_contours] = shch[0]
+                sig_cnt[i, j] = slch[0]
+                sig_cnt[i, j+tot_contours] = shch[0]
             print 'mx: ', mx, ' mphi contours: ', sig_cnt[i]
 
     fnl_arr = np.column_stack((mxlist, sig_cnt))
