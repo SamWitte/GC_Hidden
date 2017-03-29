@@ -61,7 +61,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
 
     labmp = filef.find('mphi_')
     np.savetxt(MAIN_PATH + '/FileHolding/' + filef[:labmp] + 'Tabbed_mx_mphi.dat',
-               np.column_stack((mass_list[0], mass_list[1], bf_array)))
+               np.column_stack((mass_list[:, 0], mass_list[:, 1], bf_array)))
     mxlist = np.unique(mass_list[:, 1])
     mx_bflist = np.zeros((len(mxlist), 2))
 
@@ -499,6 +499,9 @@ def plot_errs():
 
     return
 
-def bf_mphi():
+def bf_mphi(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
+                   scale_r=20., rfix=8.5, rho_fix=0.4):
+
+
 
     return
