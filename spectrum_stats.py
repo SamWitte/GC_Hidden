@@ -60,7 +60,8 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         print mass_list[i][0], mass_list[i][1], bf_array[i]
 
     labmp = filef.find('mphi_')
-    np.savetxt(MAIN_PATH + '/FileHolding/' + filef[:labmp] + 'Tabbed_mx_mphi.dat')
+    np.savetxt(MAIN_PATH + '/FileHolding/' + filef[:labmp] + 'Tabbed_mx_mphi.dat',
+               np.column_stack((mass_list[0], mass_list[1], bf_array)))
     mxlist = np.unique(mass_list[:, 1])
     mx_bflist = np.zeros((len(mxlist), 2))
 
