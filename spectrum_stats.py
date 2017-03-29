@@ -60,8 +60,10 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         print mass_list[i][0], mass_list[i][1], bf_array[i]
 
     labmp = filef.find('mphi_')
-    np.savetxt(MAIN_PATH + '/FileHolding/' + filef[:labmp] + 'Tabbed_mx_mphi.dat',
-               np.column_stack((mass_list[:, 0], mass_list[:, 1], bf_array)))
+
+    ffsve = np.column_stack((mass_list[:, 1], mass_list[:, 0], bf_array))
+    ffsve = ffsve[np.argsort(ffsve[:, 0])]
+    np.savetxt(MAIN_PATH + '/FileHolding/' + filef[:labmp] + 'Tabbed_mx_mphi.dat', ffsve)
     mxlist = np.unique(mass_list[:, 1])
     mx_bflist = np.zeros((len(mxlist), 2))
 
@@ -499,9 +501,14 @@ def plot_errs():
 
     return
 
-def bf_mphi(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
+
+def bf_mphi(filef='BB_cascade_', gamma=1.2, maj=True,
                    scale_r=20., rfix=8.5, rho_fix=0.4):
-
-
+    num_print = 5
+    load_tab = np.loadtxt(MAIN_PATH + '/FileHolding/' + filef + 'Tabbed_mx_mphi.dat')
+    for i in range(num_print):
+        agm = np.argmin(load_tab[:, 2])
+        print load_tab[agm]
+        load_tab = np.delete(load_tab, agm, 0)
 
     return

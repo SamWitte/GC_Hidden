@@ -9,8 +9,9 @@ path = os.getcwd()
 
 parser = argparse.ArgumentParser()
 
-# eg ['BB_direct_mx_', 'TauTau_direct_mx_', 'BB_cascade_mphi_']
+# eg ['BB_direct_mx_', 'TauTau_direct_mx_', 'BB_cascade_mphi_', 'Zprime_cascade_mphi_','Photon_cascade_mphi_']
 parser.add_argument('--filef', default='TauTau_direct_mx_')
+
 parser.add_argument('--s_high', type=float, default=8.e-27)
 parser.add_argument('--s_low', type=float, default=1.e-27)
 parser.add_argument('--n_sigs', type=int, default=150)
@@ -29,7 +30,7 @@ MX_MPHI_SCAN = False
 
 if args.maj == 'T':
     maj = True
-elif args.maj == 'F':
+else:
     maj = False
 
 if MASS_SCAN:
@@ -41,7 +42,5 @@ if MASS_SCAN:
 
 if MX_MPHI_SCAN:
     mx_mphi_scroll(filef=args.filef, gamma=args.gamma, maj=maj,
-                   scale_r=args.scale_r, rfix=args.rfix, rho_fix=args.rho_fix,
-                   contour_val=args.contour_val,
-                   contour_name=args.contour_name)
+                   scale_r=args.scale_r, rfix=args.rfix, rho_fix=args.rho_fix)
 
