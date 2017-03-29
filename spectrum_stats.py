@@ -298,9 +298,10 @@ def chi_covariance(spec='BB_direct_mx_50GeV.dat', maj=True, l_min=0.,
     try:
         load_s = np.loadtxt(MAIN_PATH + '/Spectrum/' + spec)
         dn = interp1d(load_s[:, 0], load_s[:, 1], kind='cubic', bounds_error=False, fill_value=0.)
-    except FileNotFoundError:
+    except:
         print 'Spectrum File Not Found.'
-        raise FileNotFoundError
+        print MAIN_PATH + '/Spectrum/' + spec
+        raise ValueError
 
     findmx = spec.find('mx_')
     findGeV = spec.find('GeV')
@@ -395,7 +396,7 @@ def plot_model_vs_data(log_s, spec='BB_direct_mx_50GeV.dat', maj=True, gamma=1.2
     try:
         load_s = np.loadtxt(MAIN_PATH + '/Spectrum/' + spec)
         dn = interp1d(load_s[:,0], load_s[:,1], kind='cubic')
-    except FileNotFoundError:
+    except:
         print 'Spectrum File Not Found.'
         raise
 
