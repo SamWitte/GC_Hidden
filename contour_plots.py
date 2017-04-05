@@ -73,32 +73,36 @@ def mx_sigma_contours(end_p=np.array(['BB']), trans='_direct_',
     return
 
 
-def csec_v_mphi_various_gamma(spec='Zprime_cascade_mphi', mx=22,
-                              gam=np.array([1., 1.1, 1.2, 1.3, 1.4]),
-                              maj=True, scale_r=20., rfix=8.5, rho_fix=0.4):
+def csec_v_mphi_various_gamma(spec='Zprime_cascade_mphi',
+                              gam=np.array([1.]),
+                              maj=True, scale_r=20., rfix=8.5, rho_fix=0.4,
+                              tag=''):
 
-    all_files = glob.glob(MAIN_PATH + '/Spectrum/' + spec + '*_mx_' + str(mx) + 'GeV.dat')
-    if len(all_files) == 0:
-        all_files = glob.glob(MAIN_PATH + '/Spectrum/' + spec + '*_mx_{:.0f}'.format(mx) + '.GeV.dat')
-    filen = MAIN_PATH + '/FileHolding/CrossSec_v_mphi_' + spec[:-3] + 'x_' + str(mx) + 'GeV'
+    all_files = glob.glob(MAIN_PATH + '/Spectrum/' + spec + '*' + '.dat')
 
+    filen = MAIN_PATH + '/FileHolding/CrossSec_v_m_' + spec[:-5] + tag
 
     for j, gamma in enumerate(gam):
+        print 'Gamma: ', gamma
         fix_g_list = np.zeros((len(all_files), 3))
         for i, f in enumerate(all_files):
             findmphi = f.find('mphi_')
             findmx = f.find('mx_')
             findGeV = f.find('GeV')
             mph = np.float(f[findmphi + 5:(findmx - 1)])
+            mx = np.float(f[findmx + 3:findGeV])
+            print 'Mx, mph: ', mx, mph
+            if mx == mph:
             #print 'Mphi = {:.2f}'.format(mph)
-            f_tail = f[f.find(spec):]
+                f_tail = f[f.find(spec):]
 
-            bf_array = sig_contour(spec=f_tail, gamma=gamma, maj=maj, scale_r=scale_r, rfix=rfix,
-                                   rho_fix=rho_fix, ret_bf=True, ret_cs=True)
+                bf_array = sig_contour(spec=f_tail, gamma=gamma, maj=maj, scale_r=scale_r, rfix=rfix,
+                                       rho_fix=rho_fix, ret_bf=True, ret_cs=True)
 
-            fix_g_list[i] = [mph, bf_array[0], bf_array[1]]
+                fix_g_list[i] = [mph, bf_array[0], bf_array[1]]
         fix_g_list = fix_g_list[np.argsort(fix_g_list[:, 0])]
         svname = filen + '_gamma_{:.2f}_rfix_{:.2f}_rhofix_{:.2f}.dat'.format(gamma, rfix, rho_fix)
+        fix_g_list = fix_g_list[fix_g_list[:,0] > 0]
         np.savetxt(svname, fix_g_list)
 
     return
