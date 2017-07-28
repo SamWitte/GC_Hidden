@@ -68,7 +68,11 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
 
     ffsve = np.column_stack((mass_list[:, 1], mass_list[:, 0], bf_array))
     ffsve = ffsve[np.argsort(ffsve[:, 0])]
-    np.savetxt(MAIN_PATH + '/FileHolding/' + filef[:labmp] + 'Tabbed_mx_mphi.dat', ffsve)
+    if cut_tail
+        f_save_n = MAIN_PATH + '/FileHolding/' + filef[:labmp] + '_CUT_Tabbed_mx_mphi.dat'
+    else:
+        f_save_n = MAIN_PATH + '/FileHolding/' + filef[:labmp] + 'Tabbed_mx_mphi.dat'
+    np.savetxt(f_save_n, ffsve)
     mxlist = np.unique(mass_list[:, 1])
     mx_bflist = np.zeros((len(mxlist), 2))
 
@@ -138,6 +142,8 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
 
     for i, cc in enumerate(contour_name):
         c_fname = MAIN_PATH + '/FileHolding/Contours/' + filef + cc
+        if cut_tail:
+            c_fname += '_CUT_'
         c_fname += 'Gamma_{:.2f}_ScaleR_{:.2f}_Rfix_{:.2f}_RhoFix_{:.2f}'.format(gamma, scale_r, rfix, rho_fix)
         c_fname += '.dat'
         consv = np.column_stack((fnl_arr[:, 0], fnl_arr[:, i+1], fnl_arr[:, i+1+tot_contours]))
@@ -202,6 +208,8 @@ def mass_scan(filef='BB_direct_mx_', gamma=1.2, maj=True, s_low=5.e-27,
     tot_contours = len(contour_name)
     for i, cc in enumerate(contour_name):
         c_fname = MAIN_PATH + '/FileHolding/Contours/' + filef + cc
+        if cut_tail:
+            c_fname += '_CUT_'
         c_fname += 'Gamma_{:.2f}_ScaleR_{:.2f}_Rfix_{:.2f}_RhoFix_{:.2f}'.format(gamma, scale_r, rfix, rho_fix)
         c_fname += '.dat'
         consv = np.stack((mx_list, contours[:, i], contours[:, i+tot_contours]), axis=-1)

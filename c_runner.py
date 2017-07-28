@@ -40,7 +40,7 @@ if MASS_SCAN:
               s_low=args.s_low, s_high=args.s_high, n_sigs=args.n_sigs,
               contour_val=args.contour_val,
               contour_name=args.contour_name,
-              scale_r=args.scale_r, rfix=args.rfix, rho_fix=args.rho_fix)
+              scale_r=args.scale_r, rfix=args.rfix, rho_fix=args.rho_fix, cut_tail=cut_tail)
 
 if MX_MPHI_SCAN:
     mx_mphi_scroll(filef=args.filef, gamma=args.gamma, maj=maj,
