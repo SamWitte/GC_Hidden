@@ -42,7 +42,12 @@ except KeyError:
 def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
                    scale_r=20., rfix=8.5, rho_fix=0.4,
                    contour_val=np.array([26.66, 33.15, 36.4]),
-                   contour_name=np.array(['_p32', '_p10', '_p05'])):
+                   contour_name=np.array(['_p32', '_p10', '_p05']), cut_tail=False):
+    if cut_tail:
+        contour_val[0] = 22.4
+        contour_val[1] = 28.4
+        contour_val[2] = 31.4
+    
     all_files = glob.glob(MAIN_PATH + '/Spectrum/' + filef + '*.dat')
 
     bf_array = np.zeros(len(all_files))
@@ -56,7 +61,7 @@ def mx_mphi_scroll(filef='BB_cascade_mphi_', gamma=1.2, maj=True,
         print 'Mphi, Mx, BF'
         f_tail = f[f.find(filef):]
         bf_array[i] = sig_contour(spec=f_tail, gamma=gamma, maj=maj, scale_r=scale_r, rfix=rfix,
-                                  rho_fix=rho_fix, ret_bf=True)
+                                  rho_fix=rho_fix, ret_bf=True, cut_tail=cut_tail)
         print mass_list[i][0], mass_list[i][1], bf_array[i]
 
     labmp = filef.find('mphi_')
@@ -148,7 +153,7 @@ def mass_scan(filef='BB_direct_mx_', gamma=1.2, maj=True, s_low=5.e-27,
               s_high=5.e-26, n_sigs=30,
               contour_val=np.array([2.3, 6.2, 11.8]),
               contour_name=np.array(['_1Sigma', '_2Sigma', '_3Sigma']),
-              scale_r=20., rfix=8.5, rho_fix=0.4):
+              scale_r=20., rfix=8.5, rho_fix=0.4, cut_tail=False):
 
     all_files = glob.glob(MAIN_PATH + '/Spectrum/' + filef + '*.dat')
 
@@ -164,7 +169,7 @@ def mass_scan(filef='BB_direct_mx_', gamma=1.2, maj=True, s_low=5.e-27,
         print 'On Mass {:.2f}...'.format(mx_list[i])
         bf_array[i] = sig_contour(spec=f_tail, gamma=gamma, maj=maj, s_low=s_low, s_high=s_high, n_sigs=n_sigs,
                                   contour_val=contour_val, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix,
-                                  make_file=True)
+                                  make_file=True, cut_tail=cut_tail)
     #print mx_list
     #print bf_array
     order = np.argsort(mx_list)
@@ -187,7 +192,7 @@ def mass_scan(filef='BB_direct_mx_', gamma=1.2, maj=True, s_low=5.e-27,
         f_tail = f[f.find(filef):]
         hold = sig_contour(spec=f_tail, gamma=gamma, maj=maj, s_low=s_low, s_high=s_high, n_sigs=n_sigs,
                                    contour_val=contour_val, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix,
-                                   make_file=False, goal=goal.fun)
+                                   make_file=False, goal=goal.fun, cut_tail=cut_tail)
         info_hold[i] = hold[-1]
         print 'On Mass {:.2f}...'.format(mx_list[i])
         print 'Info Hold: ', info_hold[i]
@@ -211,7 +216,7 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
                 s_low=5.e-27, s_high=5.e-26, n_sigs=10,
                 contour_val=np.array([2.3, 6.2, 11.8]),
                 scale_r=20., rfix=8.5, rho_fix=0.4, make_file=True,
-                goal=24., ret_bf=False, ret_cs=False):
+                goal=24., ret_bf=False, ret_cs=False, cut_tail=False):
 
     file_name = MAIN_PATH + '/FileHolding/Contours/ChiSq/Tabbed_ChiSq_'
     file_name += 'Gamma_{:.2f}_ScaleR_{:.2f}_Rfix_{:.2f}_RhoFix_{:.2f}'.format(gamma, scale_r, rfix, rho_fix)
@@ -222,7 +227,8 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
     mx = float(spec[findmx + 3:findGeV])
 
     if ret_bf:
-        bf = chi_covariance(spec=spec, maj=maj, gamma=gamma, bf=True, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix)
+        bf = chi_covariance(spec=spec, maj=maj, gamma=gamma, bf=True, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix,
+                            cut_tail=cut_tail)
         if ret_cs:
             return bf
         else:
@@ -230,7 +236,8 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
 
     if make_file:
 
-        bf = chi_covariance(spec=spec, maj=maj, gamma=gamma, bf=True, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix)
+        bf = chi_covariance(spec=spec, maj=maj, gamma=gamma, bf=True, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix,
+                            cut_tail=cut_tail)
 
         if os.path.isfile(file_name):
             print 'File already made.'
@@ -242,7 +249,7 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
         for i, sig in enumerate(s_list):
 
             hold_tab[i] = chi_covariance(spec=spec, maj=maj, gamma=gamma, bf=False, sig=sig,
-                                         scale_r=scale_r, rfix=rfix, rho_fix=rho_fix)
+                                         scale_r=scale_r, rfix=rfix, rho_fix=rho_fix, cut_tail=cut_tail)
             print 'Sigma {:.2f}, ChiSq: {:.2f}'.format(sig, hold_tab[i, 1])
 
         np.savetxt(file_name, hold_tab)
@@ -254,7 +261,7 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
                               kind='cubic', fill_value=10.**5., bounds_error=False)
         #chi_interp = interp1d(chisq[:, 0], chisq[:, 1], kind='linear', fill_value=10. ** 5., bounds_error=False)
 
-        bf = chi_covariance(spec=spec, maj=maj, gamma=gamma, bf=True, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix)
+        bf = chi_covariance(spec=spec, maj=maj, gamma=gamma, bf=True, scale_r=scale_r, rfix=rfix, rho_fix=rho_fix, cut_tail=cut_tail)
         print 'ChiSq Min: {:.2f}'.format(bf[1])
 
         sl = np.zeros(len(contour_val))
@@ -287,10 +294,13 @@ def sig_contour(spec='BB_direct_mx_50GeV.dat', gamma=1.2, maj=True,
 
 def chi_covariance(spec='BB_direct_mx_50GeV.dat', maj=True, l_min=0.,
                    l_max=20., b_min=2., b_max=20., gamma=1.2, bf=True, sig=-26.,
-                   scale_r=20., rfix=8.5, rho_fix=0.4):
+                   scale_r=20., rfix=8.5, rho_fix=0.4, cut_tail=False):
 
     gce_file = np.loadtxt(MAIN_PATH + 'GC_stat_err.dat')
     gce_dat = np.loadtxt(MAIN_PATH + 'GC_dat.dat')
+    if cut_tail:
+        gce_dat = gce_dat[:-4]
+        gce_file = gce_file[:-4]
     
     Jfac = Gen_NFW(gamma=gamma, scale_r=scale_r, rfix=rfix,
                    rho_fix=rho_fix).J(l_min=l_min, l_max=l_max, b_min=b_min, b_max=b_max)
@@ -312,7 +322,7 @@ def chi_covariance(spec='BB_direct_mx_50GeV.dat', maj=True, l_min=0.,
 
     dim = len(n_obs)
 
-    edm = np.logspace(np.log10(0.3), np.log10(30.), 300)
+    edm = np.logspace(np.log10(0.3), np.log10(mx - 1.), 300)
     model = np.zeros((len(edm),2))
     for i in range(len(edm)):
         if edm[i] < mx:
@@ -326,7 +336,7 @@ def chi_covariance(spec='BB_direct_mx_50GeV.dat', maj=True, l_min=0.,
                             kind='cubic', fill_value=0., bounds_error=False)
 
     dm_ev = 10.**model_interp(np.log10(gce_dat[:,0]))
-    sigma = build_covariance_matrix(gce_file[:,1], gce_file[:,3], gce_file[:, 2])
+    sigma = build_covariance_matrix(gce_file[:,1], gce_file[:,3], gce_file[:, 2], dim=gce_file.shape[0])
 
     if bf:
         bf = minimize(chi_sq, np.array([-26.]), args=(dm_ev, n_obs, sigma), tol=0.001)
